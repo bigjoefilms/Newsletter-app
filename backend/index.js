@@ -1,21 +1,18 @@
 // Importing required modules
 const express = require('express');
 const Email = require('./models/Email');
+const cors = require('cors');
 
 // Creating an Express application
 const app = express();
 
-const port = 3000;
+const port = 3001;
 
 app.use(express.json());
-
-// Defining a route
-app.get('/', (req, res) => {
-  res.json({'Hello': 'Express!'});
-});
+app.use(express.static('../frontend/build'));
 
 // Create an email
-app.post('/subscribers', async (req, res) => {
+app.post('/subscribers', cors(), async (req, res) => {
   try {
     const { email } = req.body;
     const newEmail = await Email.create({ email });
@@ -27,7 +24,7 @@ app.post('/subscribers', async (req, res) => {
 });
 
 // Read all emails
-app.get('/subscribers', async (req, res) => {
+app.get('/subscribers', cors(), async (req, res) => {
   try {
     const emails = await Email.findAll();
     res.json(emails);
@@ -38,7 +35,7 @@ app.get('/subscribers', async (req, res) => {
 });
 
 // Read a specific email
-app.get('/subscribers/:id', async (req, res) => {
+app.get('/subscribers/:id', cors(), async (req, res) => {
   try {
     const { id } = req.params;
     const email = await Email.findByPk(id);
@@ -54,7 +51,7 @@ app.get('/subscribers/:id', async (req, res) => {
 });
 
 // Update an email
-app.put('/subscribers/:id', async (req, res) => {
+app.put('/subscribers/:id', cors(), async (req, res) => {
   try {
     const { id } = req.params;
     const { email } = req.body;
@@ -73,7 +70,7 @@ app.put('/subscribers/:id', async (req, res) => {
 });
 
 // Delete an email
-app.delete('/subscribers/:id', async (req, res) => {
+app.delete('/subscribers/:id', cors(), async (req, res) => {
   try {
     const { id } = req.params;
     const emailToDelete = await Email.findByPk(id);
