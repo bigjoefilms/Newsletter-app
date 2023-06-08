@@ -1,34 +1,89 @@
+// Importing required modules
 const express = require('express');
-const bodyParser = require('body-parser');
+const Email = require('./models/Email');
+const cors = require('cors');
 
+// Creating an Express application
 const app = express();
-const port = 3000;
 
-// Middleware to parse request body
-app.use(bodyParser.json());
+const port = 3001;
 
-// Dummy data array to simulate database storage
-let subscribers = [];
+app.use(express.json());
+app.use(express.static('../frontend/build'));
 
-// Endpoint to handle new subscriber registration
-app.post('/send-email', (req, res) => {
-  const { email } = req.body;
-
-  // Create a new subscriber object
-  const newSubscriber = {
-    id: subscribers.length + 1,
-    email
-  };
-
-  // Store the new subscriber
-  subscribers.push(newSubscriber);
-
-  res.status(201).json(newSubscriber);
+// Create an email
+app.post('/subscribers', cors(), async (req, res) => {
+  try {
+    const { email } = req.body;
+    const newEmail = await Email.create({ email });
+    res.status(201).json(newEmail);
+  } catch (error) {
+    console.error('Error creating email:', error);
+    res.status(500).json({ error: 'Unable to create email' });
+  }
 });
 
-// Endpoint to get all subscribers
-app.get('/subscribers', (req, res) => {
-  res.status(200).json(subscribers);
+// Read all emails
+app.get('/subscribers', cors(), async (req, res) => {
+  try {
+    const emails = await Email.findAll();
+    res.json(emails);
+  } catch (error) {
+    console.error('Error retrieving emails:', error);
+    res.status(500).json({ error: 'Unable to retrieve emails' });
+  }
+});
+
+// Read a specific email
+app.get('/subscribers/:id', cors(), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const email = await Email.findByPk(id);
+    if (email) {
+      res.json(email);
+    } else {
+      res.status(404).json({ error: 'Email not found' });
+    }
+  } catch (error) {
+    console.error('Error retrieving email:', error);
+    res.status(500).json({ error: 'Unable to retrieve email' });
+  }
+});
+
+// Update an email
+app.put('/subscribers/:id', cors(), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.body;
+    const emailToUpdate = await Email.findByPk(id);
+    if (emailToUpdate) {
+      emailToUpdate.email = email;
+      await emailToUpdate.save();
+      res.json(emailToUpdate);
+    } else {
+      res.status(404).json({ error: 'Email not found' });
+    }
+  } catch (error) {
+    console.error('Error updating email:', error);
+    res.status(500).json({ error: 'Unable to update email' });
+  }
+});
+
+// Delete an email
+app.delete('/subscribers/:id', cors(), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const emailToDelete = await Email.findByPk(id);
+    if (emailToDelete) {
+      await emailToDelete.destroy();
+      res.sendStatus(204);
+    } else {
+      res.status(404).json({ error: 'Email not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting email:', error);
+    res.status(500).json({ error: 'Unable to delete email' });
+  }
 });
 
 // Start the server
