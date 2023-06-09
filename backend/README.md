@@ -1,7 +1,7 @@
 
 # Email Subscriber App
 
-This is a simple Express.js application that should provides RESTful APIs for managing email subscribers.
+This is a simple Express.js application that should provide RESTful APIs for managing email subscribers.
  
 The app for now doesn't send emails but allows you to create, read, update, and delete email subscribers.
 
